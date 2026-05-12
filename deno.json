@@ -9,5 +9,9 @@
   },
   "compilerOptions": {
     "strict": true
+  },
+  "deploy": {
+    "org": "kirazul",
+    "app": "verome-api"
   }
 }

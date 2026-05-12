@@ -1,5 +1,5 @@
 /**
- * Virome API - Clean Professional UI
+ * Verome API - Clean Professional UI
  */
 
 export const html = `<!DOCTYPE html>
@@ -7,7 +7,7 @@ export const html = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virome API</title>
+  <title>Verome API</title>
   <link rel="icon" href="/assets/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -84,8 +84,8 @@ export const html = `<!DOCTYPE html>
   <div class="bg"></div>
   <div class="container">
     <div class="hero">
-      <img src="/assets/logo.png" alt="Virome" class="logo">
-      <h1 class="title">Virome API</h1>
+      <img src="/assets/logo.png" alt="Verome" class="logo">
+      <h1 class="title">Verome API</h1>
       <p class="subtitle">Music API for YouTube Music, Lyrics & Streaming</p>
     </div>
     
