@@ -1,0 +1,13 @@
+{
+  "name": "@kirazul/verome-api",
+  "version": "2.0.0",
+  "exports": "./main.ts",
+  "tasks": {
+    "start": "deno run --allow-net --allow-env --allow-read main.ts",
+    "dev": "deno run --watch --allow-net --allow-env --allow-read main.ts",
+    "deploy": "deno deploy"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}
