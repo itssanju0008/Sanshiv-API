@@ -2,7 +2,7 @@
  * Verome API - Entry Point
  * Music API for YouTube Music, Lyrics & Streaming
  *
- * Run: deno task start
+ * Run: deno task startm
  * Dev: deno task dev
  * Deploy: deno task deploy
  */
