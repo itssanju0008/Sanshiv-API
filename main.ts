@@ -3,7 +3,7 @@
  * Music API for YouTube Music, Lyrics & Streaming
  *
  * Run: deno task startm
- * Dev: deno task dev
+ * Dev: deno task dev j
  * Deploy: deno task deploy
  */
 
