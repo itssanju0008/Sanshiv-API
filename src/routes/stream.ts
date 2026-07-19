@@ -4,13 +4,23 @@
  */
 
 import { json, error, corsHeaders } from "../helpers/response.ts";
-import { fetchFromPiped, fetchFromInvidious } from "../services/streaming.ts";
+import { fetchFromYouTube, fetchFromPiped, fetchFromInvidious } from "../services/streaming.ts";
 import type { YTMusic } from "../services/ytmusic.ts";
 
 export async function handleStream(searchParams: URLSearchParams): Promise<Response> {
   const id = searchParams.get("id");
   if (!id) return error("Missing id");
 
+  // 1. Try direct YouTube Music internal API first (same as website IFrame)
+  const yt = await fetchFromYouTube(id);
+  if (yt.success) {
+    return json({
+      success: true, service: "youtube", streamingUrls: yt.streamingUrls,
+      metadata: yt.metadata, requestedId: id, timestamp: new Date().toISOString(),
+    });
+  }
+
+  // 2. Fallback to Piped instances
   const piped = await fetchFromPiped(id);
   if (piped.success) {
     return json({
@@ -20,6 +30,7 @@ export async function handleStream(searchParams: URLSearchParams): Promise<Respo
     });
   }
 
+  // 3. Last resort: Invidious instances
   const invidious = await fetchFromInvidious(id);
   if (invidious.success) {
     return json({

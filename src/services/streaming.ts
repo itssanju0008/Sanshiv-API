@@ -45,6 +45,113 @@ async function getDynamicInstances() {
   }
 }
 
+/**
+ * Primary: Fetch stream URLs directly from YouTube Music internal player API.
+ * Uses the same WEB_REMIX client that the website's YouTube IFrame uses.
+ * No Piped/Invidious required — works directly like the web player.
+ */
+export async function fetchFromYouTube(videoId: string) {
+  const clients = [
+    {
+      clientName: "WEB_REMIX",
+      clientVersion: "1.20250701.01.00",
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+      origin: "https://music.youtube.com",
+      clientNameId: "67",
+      playerUrl: "https://music.youtube.com/youtubei/v1/player?prettyPrint=false",
+    },
+    {
+      clientName: "TVHTML5_SIMPLY_EMBEDDED_PLAYER",
+      clientVersion: "2.0",
+      userAgent: "Mozilla/5.0 (SMART-TV; Linux; Tizen 6.0) AppleWebKit/538.1 (KHTML, like Gecko) Version/6.0 TV Safari/538.1",
+      origin: "https://www.youtube.com",
+      clientNameId: "85",
+      playerUrl: "https://www.youtube.com/youtubei/v1/player?prettyPrint=false",
+    },
+  ];
+
+  for (const client of clients) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const payload = {
+        videoId,
+        context: {
+          client: {
+            clientName: client.clientName,
+            clientVersion: client.clientVersion,
+            hl: "en",
+            gl: "US",
+          },
+        },
+        playbackContext: {
+          contentPlaybackContext: {
+            signatureTimestamp: 19950,
+          },
+        },
+      };
+
+      const response = await fetch(client.playerUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": client.userAgent,
+          "Origin": client.origin,
+          "Referer": client.origin + "/",
+          "X-YouTube-Client-Name": client.clientNameId,
+          "X-YouTube-Client-Version": client.clientVersion,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const data = await response.json();
+
+      if (data?.playabilityStatus?.status === "OK") {
+        const streamingData = data.streamingData;
+        if (!streamingData) continue;
+
+        const audioFormats = [
+          ...(streamingData.adaptiveFormats || []),
+          ...(streamingData.formats || []),
+        ].filter((f: any) =>
+          (f.mimeType?.includes("audio") || f.audioQuality) && f.url
+        );
+
+        if (audioFormats.length === 0) continue;
+
+        // Sort by bitrate descending for best quality
+        audioFormats.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
+
+        return {
+          success: true,
+          service: "youtube",
+          streamingUrls: audioFormats.map((f: any) => ({
+            url: f.url,
+            mimeType: f.mimeType,
+            bitrate: f.bitrate,
+            audioQuality: f.audioQuality,
+            itag: f.itag,
+          })),
+          metadata: {
+            id: videoId,
+            title: data.videoDetails?.title,
+            author: data.videoDetails?.author,
+            duration: parseInt(data.videoDetails?.lengthSeconds || "0"),
+            thumbnail: data.videoDetails?.thumbnail?.thumbnails?.slice(-1)[0]?.url,
+          },
+        };
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return { success: false, error: "YouTube direct extraction failed" };
+}
+
 export async function fetchFromPiped(videoId: string) {
   const instances = await getDynamicInstances();
   const pipedInstances = instances.piped || [];
