@@ -51,9 +51,14 @@ export async function fetchFromPiped(videoId: string) {
 
   for (const instance of pipedInstances) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
       const response = await fetch(`${instance}/streams/${videoId}`, {
         headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (data?.error) continue;
@@ -97,7 +102,13 @@ export async function fetchFromInvidious(videoId: string) {
 
   for (const instance of invidiousInstances) {
     try {
-      const response = await fetch(`${instance}/api/v1/videos/${videoId}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      const response = await fetch(`${instance}/api/v1/videos/${videoId}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (data) {
