@@ -8,15 +8,20 @@ let instancesCacheTime = 0;
 const CACHE_DURATION = 5 * 60 * 1000;
 
 const PIPED_INSTANCES = [
+  "https://pipedapi.kavin.rocks",
+  "https://pipedapi.leptons.xyz",
+  "https://pipedapi.nosebs.ru",
+  "https://pipedapi-libre.kavin.rocks",
+  "https://piped-api.privacy.com.de",
+  "https://pipedapi.adminforge.de",
+  "https://pipedapi.drgns.space",
+  "https://pipedapi.owo.si",
+  "https://pipedapi.ducks.party",
+  "https://piped-api.codespace.cz",
+  "https://pipedapi.reallyaweso.me",
   "https://api.piped.private.coffee",
   "https://pipedapi.darkness.services",
-  "https://pipedapi.r4fo.com",
-  "https://api.piped.yt",
-  "https://pipedapi.kavin.rocks",
-  "https://pipedapi.adminforge.de",
-  "https://pipedapi.in.projectsegfau.lt",
-  "https://api.piped.projectsegfau.lt",
-  "https://pipedapi.leptons.xyz",
+  "https://pipedapi.orangenet.cc",
 ];
 
 async function getDynamicInstances() {
@@ -99,6 +104,8 @@ export async function fetchFromInvidious(videoId: string) {
         const audioFormats = (data.adaptiveFormats || []).filter((f: any) =>
           f.type?.includes("audio") || f.mimeType?.includes("audio")
         );
+
+        if (audioFormats.length === 0) continue;
 
         return {
           success: true,
